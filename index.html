@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>घरचा बाजार • Smart Grocery</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --saffron:#FF6B00;--sl:#FF9A3C;--sp:#FFF3E8;
+  --dmart:#0057A8;--dmb:#E3F0FF;
+  --patel:#2E7D32;--ptb:#E8F5E9;
+  --rel:#C62828;--rlb:#FFEBEE;
+  --cream:#FFF8F0;--warm:#FFFCF7;--dark:#1A1209;--mid:#5C4A2A;
+  --bdr:#E8D5B7;--ckbg:#F0F7F0;--shd:0 4px 24px rgba(255,107,0,.10);
+  --ai:#7C3AED;--aib:#F5F0FF;--aid:#DDD6FE;
+  --gs:#0F9D58;--gsb:#E6F4EA;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh}
+
+header{background:linear-gradient(135deg,var(--saffron),#E65100);color:#fff;padding:14px 18px 10px;position:sticky;top:0;z-index:100;box-shadow:0 3px 18px rgba(230,81,0,.35)}
+header h1{font-family:'Tiro Devanagari Marathi',serif;font-size:1.5rem}
+header p{font-size:.72rem;opacity:.85;margin-top:1px}
+.hrow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.msel{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:5px 9px;font-size:.8rem;font-family:'Lato',sans-serif;cursor:pointer;outline:none}
+.msel option{color:var(--dark);background:#fff}
+
+/* SYNC STATUS */
+.sync-bar{background:rgba(0,0,0,.15);padding:5px 18px;display:flex;align-items:center;gap:8px;font-size:.72rem;color:rgba(255,255,255,.9);flex-wrap:wrap}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sync-dot.ok{background:#69F0AE}
+.sync-dot.saving{background:#FFD740;animation:pulse .8s infinite alternate}
+.sync-dot.error{background:#FF5252}
+@keyframes pulse{to{opacity:.4}}
+.sync-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:3px 9px;font-size:.68rem;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif}
+
+/* TABS */
+.tabs{display:flex;background:var(--warm);border-bottom:2px solid var(--bdr);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 15px;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;cursor:pointer;border:none;background:none;color:var(--mid);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:'Lato',sans-serif;transition:all .2s}
+.tab.active{color:var(--saffron);border-bottom-color:var(--saffron)}
+
+.main{max-width:860px;margin:0 auto;padding:16px 13px 90px}
+
+/* STORE FILTER */
+.sfil{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.sbtn{padding:6px 13px;border-radius:20px;border:2px solid;font-weight:700;font-size:.73rem;cursor:pointer;transition:all .2s;font-family:'Lato',sans-serif;text-transform:uppercase;letter-spacing:.4px}
+.sbtn.all{border-color:var(--saffron);color:var(--saffron);background:#fff}
+.sbtn.all.active,.sbtn.all:hover{background:var(--saffron);color:#fff}
+.sbtn.dmart{border-color:var(--dmart);color:var(--dmart);background:#fff}
+.sbtn.dmart.active,.sbtn.dmart:hover{background:var(--dmart);color:#fff}
+.sbtn.patel{border-color:var(--patel);color:var(--patel);background:#fff}
+.sbtn.patel.active,.sbtn.patel:hover{background:var(--patel);color:#fff}
+.sbtn.reliance{border-color:var(--rel);color:var(--rel);background:#fff}
+.sbtn.reliance.active,.sbtn.reliance:hover{background:var(--rel);color:#fff}
+
+/* PROGRESS */
+.pgwrap{margin-bottom:14px}
+.pgbg{background:var(--bdr);border-radius:8px;height:8px;overflow:hidden}
+.pgfill{height:100%;background:linear-gradient(90deg,var(--saffron),var(--sl));border-radius:8px;transition:width .4s}
+.pglbl{font-size:.74rem;color:var(--mid);margin-top:4px}
+
+/* CATEGORY */
+.catblock{background:#fff;border-radius:14px;margin-bottom:11px;box-shadow:var(--shd);overflow:hidden;border:1px solid var(--bdr);transition:transform .15s}
+.catblock:hover{transform:translateY(-1px)}
+.cathdr{display:flex;align-items:center;padding:10px 14px;cursor:pointer;user-select:none;background:var(--warm);border-bottom:1px solid var(--bdr);gap:8px}
+.caticon{font-size:1.15rem}
+.cattitle{font-weight:900;font-size:.85rem;text-transform:uppercase;letter-spacing:.4px;flex:1}
+.catcnt{font-size:.7rem;color:var(--mid);background:var(--bdr);padding:2px 7px;border-radius:10px}
+.cattog{color:var(--mid);font-size:.8rem;transition:transform .2s}
+.cattog.open{transform:rotate(180deg)}
+.ilist{padding:5px 0;display:none}
+.ilist.vis{display:block}
+
+/* ITEM ROW */
+.irow{display:flex;align-items:center;padding:8px 13px;gap:9px;border-bottom:1px solid #F5EDE0;transition:background .2s;position:relative}
+.irow:last-child{border-bottom:none}
+.irow.ckd{background:var(--ckbg)}
+.irow.ckd .iname{text-decoration:line-through;opacity:.4}
+.irow.hid{display:none}
+
+.chk{width:22px;height:22px;border:2px solid var(--bdr);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;background:#fff}
+.chk.on{background:var(--patel);border-color:var(--patel)}
+.chk.on::after{content:'✓';color:#fff;font-size:13px;font-weight:900}
+
+.iinfo{flex:1;min-width:0}
+.iname{font-size:.88rem;font-weight:700}
+.isub{font-size:.68rem;color:var(--mid);margin-top:1px}
+.lohint{font-size:.64rem;color:var(--ai);background:var(--aib);border:1px solid var(--aid);border-radius:5px;padding:2px 5px;margin-top:3px;display:inline-flex;align-items:center;gap:3px;font-weight:700}
+
+.iqty{display:flex;align-items:center;gap:5px}
+.qbtn{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--bdr);background:#fff;cursor:pointer;font-size:.85rem;font-weight:900;display:flex;align-items:center;justify-content:center;color:var(--mid);transition:all .15s}
+.qbtn:hover{border-color:var(--saffron);color:var(--saffron)}
+.qval{font-size:.8rem;font-weight:700;min-width:48px;text-align:center}
+
+.stag{font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:10px;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;cursor:pointer;transition:all .2s}
+.stag:hover{transform:scale(1.1)}
+.stag.dmart{background:var(--dmb);color:var(--dmart)}
+.stag.patel{background:var(--ptb);color:var(--patel)}
+.stag.reliance{background:var(--rlb);color:var(--rel)}
+.stag.both{background:#FFF3E0;color:var(--saffron)}
+
+.inote{font-size:.66rem;color:var(--mid);border:none;border-bottom:1px dashed var(--bdr);background:transparent;width:65px;outline:none;font-family:'Lato',sans-serif;padding:1px 2px}
+.delbtn{background:none;border:none;cursor:pointer;color:#ddd;font-size:.82rem;padding:2px;flex-shrink:0}
+.delbtn:hover{color:#e53935}
+
+/* ADD ROW */
+.addrow{display:flex;gap:6px;padding:8px 13px;border-top:1px dashed var(--bdr);flex-wrap:wrap}
+.addinp{flex:1;min-width:100px;border:1.5px solid var(--bdr);border-radius:8px;padding:6px 8px;font-size:.78rem;font-family:'Lato',sans-serif;outline:none}
+.addinp:focus{border-color:var(--saffron)}
+.addsel{border:1.5px solid var(--bdr);border-radius:8px;padding:6px 6px;font-size:.76rem;font-family:'Lato',sans-serif;outline:none}
+.addbtn{background:var(--saffron);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-weight:900;font-size:.76rem;cursor:pointer;font-family:'Lato',sans-serif}
+
+/* CARD */
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:13px;box-shadow:var(--shd);border:1px solid var(--bdr)}
+.card h3{font-size:.9rem;font-weight:900;margin-bottom:12px}
+
+/* GOOGLE SIGN-IN */
+.gscard{background:linear-gradient(135deg,var(--gsb),#fff);border:2px solid #A8D5B5;border-radius:14px;padding:20px;margin-bottom:16px;text-align:center}
+.gscard h3{color:var(--gs);margin-bottom:8px;font-size:.95rem}
+.gscard p{font-size:.78rem;color:var(--mid);margin-bottom:14px;line-height:1.5}
+.gs-signin-btn{background:var(--gs);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-weight:900;font-size:.85rem;cursor:pointer;font-family:'Lato',sans-serif;display:inline-flex;align-items:center;gap:8px;transition:all .2s}
+.gs-signin-btn:hover{background:#0B8043;transform:scale(1.02)}
+.gs-signed{background:var(--gsb);border:1.5px solid #A8D5B5;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gs-avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--gs)}
+.gs-name{font-size:.82rem;font-weight:700;flex:1}
+.gs-out{background:none;border:1.5px solid var(--gs);color:var(--gs);border-radius:8px;padding:5px 10px;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif}
+
+/* BILL UPLOAD */
+.bupzone{border:2.5px dashed var(--bdr);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cream)}
+.bupzone:hover{border-color:var(--saffron);background:#FFF5EC}
+.bupzone .icon{font-size:2rem;margin-bottom:7px}
+.bupzone p{font-size:.8rem;color:var(--mid)}
+#bill-file{display:none}
+
+/* AI PANEL */
+.aipanel{background:var(--aib);border:1.5px solid var(--aid);border-radius:12px;padding:13px;margin-top:13px}
+.aiptitle{font-size:.78rem;font-weight:900;color:var(--ai);margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.aistatus{font-size:.76rem;color:var(--mid);padding:4px 0}
+.spin{display:inline-block;width:15px;height:15px;border:2.5px solid var(--aid);border-top-color:var(--ai);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* SCANNED TABLE */
+.sctbl{width:100%;border-collapse:collapse;margin-top:9px;font-size:.78rem}
+.sctbl th{background:var(--ai);color:#fff;padding:6px 8px;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.3px}
+.sctbl td{padding:6px 8px;border-bottom:1px solid var(--aid)}
+.sctbl tr:last-child td{border-bottom:none}
+.sctbl tr:hover td{background:#FAF8FF}
+.scchk{cursor:pointer;accent-color:var(--ai);width:15px;height:15px}
+.imp-btn{background:var(--ai);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:900;font-size:.8rem;cursor:pointer;font-family:'Lato',sans-serif;margin-top:11px;transition:background .2s}
+.imp-btn:hover{background:#6D28D9}
+.disc-btn{background:#fff;color:var(--mid);border:1.5px solid var(--bdr);border-radius:8px;padding:9px 12px;font-weight:700;font-size:.8rem;cursor:pointer;font-family:'Lato',sans-serif;margin-top:11px;margin-left:7px}
+
+/* BILLS LIST */
+.blst{margin-top:11px}
+.bitem{display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:10px;background:var(--cream);margin-bottom:6px;border:1px solid var(--bdr);flex-wrap:wrap}
+.btag{font-size:.62rem;font-weight:900;padding:2px 6px;border-radius:7px;text-transform:uppercase;white-space:nowrap;color:#fff}
+.bname{flex:1;font-size:.8rem;font-weight:700;min-width:70px}
+.bsize{font-size:.68rem;color:var(--mid)}
+.bdel{background:none;border:none;cursor:pointer;color:#ccc;font-size:.88rem}
+.bdel:hover{color:#e53935}
+.bprev{width:100%;font-size:.7rem;color:var(--mid);margin-top:4px;padding-top:4px;border-top:1px dashed var(--bdr)}
+
+/* PURCHASE TABLE */
+.phtbl{width:100%;border-collapse:collapse;font-size:.76rem;margin-top:7px}
+.phtbl th{background:var(--saffron);color:#fff;padding:6px 8px;text-align:left;font-size:.68rem;text-transform:uppercase}
+.phtbl td{padding:6px 8px;border-bottom:1px solid var(--bdr)}
+.phtbl tr:last-child td{border-bottom:none}
+.phtbl tr:hover td{background:var(--sp)}
+
+/* BAR CHART */
+.barchart{margin-top:5px}
+.barrow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.barlbl{font-size:.73rem;min-width:80px;color:var(--mid);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bartrk{flex:1;background:var(--bdr);border-radius:6px;height:17px;overflow:hidden}
+.barfil{height:100%;border-radius:6px;transition:width .6s;display:flex;align-items:center;padding-left:5px}
+.barfil span{font-size:.62rem;font-weight:900;color:#fff;white-space:nowrap}
+.barcnt{font-size:.7rem;min-width:26px;text-align:right;color:var(--mid)}
+
+/* HEATMAP */
+.hmap{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-top:7px}
+.hmcell{aspect-ratio:1;border-radius:4px;background:var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:700;color:#fff;cursor:pointer;transition:transform .15s}
+.hmcell:hover{transform:scale(1.15);z-index:2}
+.hmlbl{font-size:.56rem;text-align:center;color:var(--mid);margin-top:3px}
+
+/* HISTORY */
+.hmonth{background:#fff;border-radius:14px;margin-bottom:11px;border:1px solid var(--bdr);overflow:hidden;box-shadow:var(--shd)}
+.hmhdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--warm);border-bottom:1px solid var(--bdr);cursor:pointer}
+.hmhdr h3{font-size:.88rem;font-weight:900}
+.hmitems{padding:9px 13px;display:none}
+.hmitems.open{display:block}
+.hmiline{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid #F5EDE0;font-size:.78rem}
+.hmiline:last-child{border-bottom:none}
+.hick{color:var(--patel);font-weight:900}
+.hiun{color:#ccc}
+
+/* NOTES */
+.notarea{width:100%;min-height:160px;border:1.5px solid var(--bdr);border-radius:12px;padding:11px;font-size:.84rem;font-family:'Lato',sans-serif;outline:none;resize:vertical;background:#fff;color:var(--dark)}
+.notarea:focus{border-color:var(--saffron)}
+.savnote{background:var(--saffron);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:900;font-size:.8rem;cursor:pointer;font-family:'Lato',sans-serif;margin-top:7px}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(26,18,9,.55);z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
+.mbg.open{display:flex}
+.modal{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:.95rem;font-weight:900;margin-bottom:10px}
+.mbtns{display:flex;gap:8px;margin-top:13px}
+.mbtn{flex:1;padding:9px;border-radius:10px;border:none;cursor:pointer;font-weight:900;font-size:.8rem;font-family:'Lato',sans-serif}
+.mbtn.pri{background:var(--saffron);color:#fff}
+.mbtn.sec{background:var(--bdr);color:var(--dark)}
+
+/* TOAST */
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark);color:#fff;padding:8px 16px;border-radius:20px;font-size:.78rem;font-weight:700;opacity:0;transition:all .3s;z-index:400;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FAB */
+.fabwrap{position:fixed;bottom:18px;right:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;z-index:200}
+.fab{background:var(--saffron);color:#fff;border:none;border-radius:50px;padding:11px 16px;font-weight:900;font-size:.8rem;cursor:pointer;box-shadow:0 4px 20px rgba(255,107,0,.4);font-family:'Lato',sans-serif;transition:all .2s;display:flex;align-items:center;gap:5px}
+.fab:hover{transform:scale(1.05);background:#E65100}
+.fab.sec{background:#fff;color:var(--saffron);border:2px solid var(--saffron);box-shadow:0 3px 12px rgba(0,0,0,.1)}
+
+.badge{display:inline-block;background:var(--saffron);color:#fff;font-size:.58rem;font-weight:900;padding:1px 5px;border-radius:8px;margin-left:4px;vertical-align:middle}
+@media(max-width:520px){.inote,.barlbl{display:none}.addinp{min-width:80px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <div>
+      <h1>🛒 घरचा बाजार</h1>
+      <p>Smart Family Grocery — Kadam Family, Badlapur</p>
+    </div>
+    <select class="msel" id="monthSelect" onchange="switchMonth(this.value)"></select>
+  </div>
+</header>
+
+<!-- SYNC STATUS BAR -->
+<div class="sync-bar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncLabel">Not connected to cloud</span>
+  <button class="sync-btn" onclick="manualSync()" id="syncBtn" style="display:none">↻ Sync Now</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('list')">📋 List</button>
+  <button class="tab" onclick="switchTab('bills')">🧾 Bills & AI</button>
+  <button class="tab" onclick="switchTab('purchases')">📦 Purchases</button>
+  <button class="tab" onclick="switchTab('history')">📅 History</button>
+  <button class="tab" onclick="switchTab('trends')">📊 Trends</button>
+  <button class="tab" onclick="switchTab('notes')">📝 Notes</button>
+  <button class="tab" onclick="switchTab('setup')">⚙️ Setup</button>
+</div>
+
+<!-- ══ LIST TAB ══ -->
+<div id="tab-list">
+  <div class="main">
+    <div class="sfil">
+      <button class="sbtn all active" onclick="filterStore('all',this)">🏪 All</button>
+      <button class="sbtn dmart" onclick="filterStore('dmart',this)">🔵 DMart</button>
+      <button class="sbtn patel" onclick="filterStore('patel',this)">🟢 Patel's</button>
+      <button class="sbtn reliance" onclick="filterStore('reliance',this)">🔴 Reliance</button>
+    </div>
+    <div class="pgwrap">
+      <div class="pgbg"><div class="pgfill" id="pgfill" style="width:0%"></div></div>
+      <div class="pglbl" id="pglbl">0 of 0 items picked</div>
+    </div>
+    <div id="catsWrap"></div>
+  </div>
+</div>
+
+<!-- ══ BILLS & AI TAB ══ -->
+<div id="tab-bills" style="display:none">
+  <div class="main">
+    <div class="card">
+      <h3>🧾 Upload Bill — AI Reads It Automatically</h3>
+      <div class="bupzone" onclick="document.getElementById('bill-file').click()">
+        <div class="icon">📄</div>
+        <p>Tap to upload grocery bill<br><strong>PDF, JPG, PNG</strong> — any shop, any format<br>
+        <span style="font-size:.68rem;color:var(--ai);font-weight:700">✨ AI extracts items, qty & prices instantly</span></p>
+      </div>
+      <input type="file" id="bill-file" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="handleBillUpload(this)">
+      <div class="aipanel" id="aiPanel" style="display:none">
+        <div class="aiptitle">✨ AI Bill Scanner</div>
+        <div id="aiStatus" class="aistatus"></div>
+        <div id="aiResult"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📂 Uploaded Bills <span id="billBadge" class="badge">0</span></h3>
+      <div class="blst" id="billsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PURCHASES TAB ══ -->
+<div id="tab-purchases" style="display:none">
+  <div class="main">
+    <div class="card">
+      <h3>📦 All Purchases from Bills</h3>
+      <p style="font-size:.76rem;color:var(--mid);margin-bottom:11px">Every item extracted from uploaded bills — month-by-month, with qty, price and store.</p>
+      <div id="purchWrap"></div>
+    </div>
+    <div class="card"><h3>🔁 Most Frequently Bought</h3><div id="freqWrap"></div></div>
+  </div>
+</div>
+
+<!-- ══ HISTORY TAB ══ -->
+<div id="tab-history" style="display:none">
+  <div class="main" id="histWrap"></div>
+</div>
+
+<!-- ══ TRENDS TAB ══ -->
+<div id="tab-trends" style="display:none">
+  <div class="main">
+    <div class="card"><h3>📦 Most Purchased Items</h3><div class="barchart" id="topChart"></div></div>
+    <div class="card"><h3>🛒 Store Preference (items bought)</h3><div class="barchart" id="storeChart"></div></div>
+    <div class="card"><h3>💰 Total Spend by Store (from bill totals)</h3><div class="barchart" id="spendChart"></div></div>
+    <div class="card"><h3>🗓️ Monthly Activity Heatmap</h3><div id="heatWrap"></div></div>
+    <div class="card"><h3>🏷️ Category Breakdown</h3><div class="barchart" id="catChart"></div></div>
+  </div>
+</div>
+
+<!-- ══ NOTES TAB ══ -->
+<div id="tab-notes" style="display:none">
+  <div class="main">
+    <div class="card">
+      <h3>📝 Notes — <span id="noteMon"></span></h3>
+      <textarea class="notarea" id="notesArea" placeholder="Budget, special items, reminders…"></textarea>
+      <button class="savnote" onclick="saveNote()">💾 Save Note</button>
+    </div>
+    <div class="card" id="oldNotes"></div>
+  </div>
+</div>
+
+<!-- ══ SETUP TAB ══ -->
+<div id="tab-setup" style="display:none">
+  <div class="main">
+
+    <!-- GOOGLE SIGN IN -->
+    <div class="gscard" id="gsCard">
+      <h3>☁️ Connect Google Account</h3>
+      <p>Sign in with Google to save your data to Google Sheets.<br>
+      Works on <strong>any browser, any device, any phone</strong>.<br>
+      Your data is stored in YOUR own Google Sheet — private and safe.</p>
+      <div id="gsSignedOut">
+        <button class="gs-signin-btn" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.4 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 13 24 13c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.5 35.6 26.9 36.5 24 36.5c-5.2 0-9.6-3.4-11.2-8.1l-6.5 5C9.5 39.9 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.7-2.7 4.9-5 6.3l6.2 5.2C40.9 36.2 44 30.5 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+      <div id="gsSignedIn" style="display:none">
+        <div class="gs-signed">
+          <img class="gs-avatar" id="gsAvatar" src="" alt="">
+          <div>
+            <div class="gs-name" id="gsName"></div>
+            <div style="font-size:.7rem;color:var(--gs)">✅ Data syncs to Google Sheets</div>
+          </div>
+          <button class="gs-out" onclick="signOutGoogle()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHEET INFO -->
+    <div class="card">
+      <h3>📊 Your Google Sheet</h3>
+      <p style="font-size:.78rem;color:var(--mid);margin-bottom:10px">After signing in, your data saves to a Google Sheet automatically. You can view it anytime.</p>
+      <div id="sheetInfo" style="font-size:.8rem;color:var(--mid)">Sign in above to see sheet details.</div>
+    </div>
+
+    <!-- API KEY -->
+    <div class="card">
+      <h3>🔑 Anthropic API Key <span style="font-size:.68rem;color:var(--ai);font-weight:700">(for AI Bill Scanning)</span></h3>
+      <p style="font-size:.76rem;color:var(--mid);margin-bottom:10px">
+        This is stored in Netlify's environment variables — <strong>not in this file</strong>. 
+        If AI scanning fails, check your Netlify dashboard → Site Settings → Environment Variables → 
+        <code style="background:#F0F0F0;padding:1px 4px;border-radius:4px">ANTHROPIC_API_KEY</code> is set correctly.
+      </p>
+      <div style="background:var(--aib);border:1px solid var(--aid);border-radius:8px;padding:10px;font-size:.76rem;color:var(--ai)">
+        ✅ API key is hidden on Netlify's server. Never visible in browser. 
+      </div>
+    </div>
+
+    <!-- DATA MANAGEMENT -->
+    <div class="card">
+      <h3>🗄️ Data Management</h3>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <button style="background:var(--gs);color:#fff;border:none;border-radius:9px;padding:10px;font-weight:900;font-size:.82rem;cursor:pointer;font-family:'Lato',sans-serif" onclick="forceSync()">☁️ Force Sync to Google Sheets Now</button>
+        <button style="background:#fff;color:var(--dmart);border:2px solid var(--dmart);border-radius:9px;padding:10px;font-weight:900;font-size:.82rem;cursor:pointer;font-family:'Lato',sans-serif" onclick="exportJSON()">📥 Export All Data as JSON (Backup)</button>
+        <button style="background:#fff;color:var(--rel);border:2px solid var(--rel);border-radius:9px;padding:10px;font-weight:900;font-size:.82rem;cursor:pointer;font-family:'Lato',sans-serif" onclick="importJSON()">📤 Import JSON Backup</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="doImport(this)">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="clearModal">
+  <div class="modal">
+    <h3>🔄 Reset This Month's Ticks?</h3>
+    <p style="font-size:.81rem;color:var(--mid)">Checkboxes will be cleared for a fresh shopping trip. Items, quantities and bill history stay.</p>
+    <div class="mbtns">
+      <button class="mbtn sec" onclick="closeModal()">Cancel</button>
+      <button class="mbtn pri" onclick="clearMonth()">Yes, Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="fabwrap">
+  <button class="fab sec" onclick="openModal()">🔄 New Trip</button>
+  <button class="fab" onclick="scrollTo({top:0,behavior:'smooth'})">☝️ Top</button>
+</div>
+
+<!-- GOOGLE IDENTITY SERVICES -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONFIG — these are set by you during Netlify setup
+// ═══════════════════════════════════════════════════════
+// Google OAuth Client ID — replace with yours from Google Cloud Console
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+// Your Netlify site URL (set automatically when deployed)
+const NETLIFY_URL = window.location.origin;
+// Google Sheets ID — created automatically after first sign-in
+let SHEET_ID = localStorage.getItem('gb_sheet_id') || '';
+
+// ═══════════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════════
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MFULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CICONS={'Dal & Pulses':'🫘','Rice & Grains':'🌾','Atta & Flour':'🌿','Oils & Ghee':'🫙','Spices (Masale)':'🌶️','Sugar, Salt & Basics':'🧂','Tea, Coffee & Breakfast':'☕','Dairy & Eggs':'🥚','Snacks & Namkeen':'🥨','Dry Fruits & Nuts':'🌰','Condiments & Sauces':'🍶','Cleaning & Household':'🧹','Personal Care':'🧴','Vegetables & Fruits':'🥦','Other':'📦'};
+const STORES={dmart:{l:'DMart',c:'#0057A8',bg:'#E3F0FF'},patel:{l:"Patel's",c:'#2E7D32',bg:'#E8F5E9'},reliance:{l:'Reliance',c:'#C62828',bg:'#FFEBEE'},both:{l:'Both',c:'#FF6B00',bg:'#FFF3E0'}};
+
+const DITEMS=[
+  {id:'i1',name:'Tur Dal',sub:'तूरडाळ',cat:'Dal & Pulses',store:'patel',qty:1,unit:'kg'},
+  {id:'i2',name:'Chana Dal',sub:'चणाडाळ',cat:'Dal & Pulses',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i3',name:'Moong Dal',sub:'मूगडाळ',cat:'Dal & Pulses',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i4',name:'Masoor Dal',sub:'मसूर',cat:'Dal & Pulses',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i5',name:'Urad Dal',sub:'उडीद डाळ',cat:'Dal & Pulses',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i6',name:'Rajma',sub:'राजमा',cat:'Dal & Pulses',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i7',name:'Dried Green Peas',sub:'वाटाणे',cat:'Dal & Pulses',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i8',name:'Basmati Rice',sub:'बासमती तांदूळ',cat:'Rice & Grains',store:'dmart',qty:5,unit:'kg'},
+  {id:'i9',name:'Sona Masuri Rice',sub:'सोना मसुरी',cat:'Rice & Grains',store:'patel',qty:5,unit:'kg'},
+  {id:'i10',name:'Poha',sub:'पोहे',cat:'Rice & Grains',store:'patel',qty:1,unit:'kg'},
+  {id:'i11',name:'Sooji / Rava',sub:'रवा',cat:'Rice & Grains',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i12',name:'Jowar',sub:'ज्वारी',cat:'Rice & Grains',store:'patel',qty:1,unit:'kg'},
+  {id:'i13',name:'Bajra',sub:'बाजरी',cat:'Rice & Grains',store:'patel',qty:1,unit:'kg'},
+  {id:'i14',name:'Wheat Atta',sub:'गव्हाचे पीठ',cat:'Atta & Flour',store:'dmart',qty:5,unit:'kg'},
+  {id:'i15',name:'Besan',sub:'बेसन',cat:'Atta & Flour',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i16',name:'Maida',sub:'मैदा',cat:'Atta & Flour',store:'dmart',qty:0.5,unit:'kg'},
+  {id:'i17',name:'Rice Flour',sub:'तांदळाचे पीठ',cat:'Atta & Flour',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i18',name:'Sunflower Oil',sub:'सूर्यफूल तेल',cat:'Oils & Ghee',store:'dmart',qty:1,unit:'L'},
+  {id:'i19',name:'Groundnut Oil',sub:'शेंगदाणा तेल',cat:'Oils & Ghee',store:'patel',qty:1,unit:'L'},
+  {id:'i20',name:'Cow Ghee',sub:'गाईचे तूप',cat:'Oils & Ghee',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i21',name:'Coconut Oil',sub:'खोबरेल तेल',cat:'Oils & Ghee',store:'patel',qty:0.5,unit:'L'},
+  {id:'i23',name:'Goda Masala',sub:'गोडा मसाला',cat:'Spices (Masale)',store:'patel',qty:0.1,unit:'kg'},
+  {id:'i24',name:'Red Chilli Powder',sub:'लाल मिरची पावडर',cat:'Spices (Masale)',store:'patel',qty:0.1,unit:'kg'},
+  {id:'i25',name:'Turmeric Powder',sub:'हळद',cat:'Spices (Masale)',store:'patel',qty:0.05,unit:'kg'},
+  {id:'i26',name:'Coriander Powder',sub:'धने पावडर',cat:'Spices (Masale)',store:'patel',qty:0.1,unit:'kg'},
+  {id:'i27',name:'Cumin Seeds',sub:'जिरे',cat:'Spices (Masale)',store:'patel',qty:0.05,unit:'kg'},
+  {id:'i28',name:'Mustard Seeds',sub:'मोहरी',cat:'Spices (Masale)',store:'patel',qty:0.05,unit:'kg'},
+  {id:'i29',name:'Hing / Asafoetida',sub:'हिंग',cat:'Spices (Masale)',store:'patel',qty:1,unit:'pkt'},
+  {id:'i30',name:'Garam Masala',sub:'गरम मसाला',cat:'Spices (Masale)',store:'patel',qty:0.05,unit:'kg'},
+  {id:'i31',name:'Kala Masala',sub:'काळा मसाला',cat:'Spices (Masale)',store:'patel',qty:0.05,unit:'kg'},
+  {id:'i35',name:'Sugar',sub:'साखर',cat:'Sugar, Salt & Basics',store:'dmart',qty:1,unit:'kg'},
+  {id:'i36',name:'Salt',sub:'मीठ',cat:'Sugar, Salt & Basics',store:'dmart',qty:1,unit:'kg'},
+  {id:'i37',name:'Jaggery / Gud',sub:'गूळ',cat:'Sugar, Salt & Basics',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i38',name:'Tamarind',sub:'चिंच',cat:'Sugar, Salt & Basics',store:'patel',qty:0.1,unit:'kg'},
+  {id:'i41',name:'Chai Patti / Tea',sub:'चहा पत्ती',cat:'Tea, Coffee & Breakfast',store:'patel',qty:0.25,unit:'kg'},
+  {id:'i42',name:'Coffee Powder',sub:'कॉफी पावडर',cat:'Tea, Coffee & Breakfast',store:'dmart',qty:0.1,unit:'kg'},
+  {id:'i43',name:'Oats',sub:'ओट्स',cat:'Tea, Coffee & Breakfast',store:'dmart',qty:0.5,unit:'kg'},
+  {id:'i44',name:'Vermicelli / Shevai',sub:'शेवया',cat:'Tea, Coffee & Breakfast',store:'patel',qty:0.2,unit:'kg'},
+  {id:'i46',name:'Amul Butter',sub:'बटर',cat:'Dairy & Eggs',store:'dmart',qty:0.5,unit:'kg'},
+  {id:'i47',name:'Paneer',sub:'पनीर',cat:'Dairy & Eggs',store:'patel',qty:0.25,unit:'kg'},
+  {id:'i49',name:'Eggs',sub:'अंडी',cat:'Dairy & Eggs',store:'patel',qty:12,unit:'pcs'},
+  {id:'i50',name:'Curd / Dahi',sub:'दही',cat:'Dairy & Eggs',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i51',name:'Chivda',sub:'चिवडा',cat:'Snacks & Namkeen',store:'patel',qty:0.25,unit:'kg'},
+  {id:'i52',name:'Shev',sub:'शेव',cat:'Snacks & Namkeen',store:'patel',qty:0.2,unit:'kg'},
+  {id:'i53',name:'Chakli',sub:'चकली',cat:'Snacks & Namkeen',store:'patel',qty:0.2,unit:'kg'},
+  {id:'i54',name:'Biscuits',sub:'बिस्किट',cat:'Snacks & Namkeen',store:'dmart',qty:2,unit:'pkt'},
+  {id:'i55',name:'Papad',sub:'पापड',cat:'Snacks & Namkeen',store:'patel',qty:1,unit:'pkt'},
+  {id:'i56',name:'Groundnuts',sub:'शेंगदाणे',cat:'Dry Fruits & Nuts',store:'patel',qty:0.5,unit:'kg'},
+  {id:'i57',name:'Cashews',sub:'काजू',cat:'Dry Fruits & Nuts',store:'dmart',qty:0.25,unit:'kg'},
+  {id:'i58',name:'Almonds',sub:'बदाम',cat:'Dry Fruits & Nuts',store:'dmart',qty:0.25,unit:'kg'},
+  {id:'i60',name:'Sesame Seeds',sub:'तीळ',cat:'Dry Fruits & Nuts',store:'patel',qty:0.1,unit:'kg'},
+  {id:'i61',name:'Dry Coconut',sub:'सुका खोबरा',cat:'Dry Fruits & Nuts',store:'patel',qty:1,unit:'pcs'},
+  {id:'i62',name:'Tomato Ketchup',sub:'टोमॅटो सॉस',cat:'Condiments & Sauces',store:'dmart',qty:1,unit:'bottle'},
+  {id:'i65',name:'Pickle / Lonche',sub:'लोणचे',cat:'Condiments & Sauces',store:'patel',qty:1,unit:'bottle'},
+  {id:'i67',name:'Detergent Powder',sub:'कपडे धुण्याचे साबण',cat:'Cleaning & Household',store:'dmart',qty:1,unit:'kg'},
+  {id:'i68',name:'Dish Soap',sub:'भांडी साबण',cat:'Cleaning & Household',store:'dmart',qty:1,unit:'bottle'},
+  {id:'i69',name:'Floor Cleaner',sub:'फिनाइल',cat:'Cleaning & Household',store:'dmart',qty:1,unit:'bottle'},
+  {id:'i71',name:'Hand Wash',sub:'हँड वॉश',cat:'Cleaning & Household',store:'dmart',qty:1,unit:'bottle'},
+  {id:'i73',name:'Trash Bags',sub:'कचरापेटी पिशव्या',cat:'Cleaning & Household',store:'dmart',qty:1,unit:'roll'},
+  {id:'i74',name:'Soap',sub:'साबण',cat:'Personal Care',store:'dmart',qty:4,unit:'pcs'},
+  {id:'i75',name:'Shampoo',sub:'शॅम्पू',cat:'Personal Care',store:'dmart',qty:1,unit:'bottle'},
+  {id:'i76',name:'Toothpaste',sub:'टूथपेस्ट',cat:'Personal Care',store:'dmart',qty:1,unit:'tube'},
+  {id:'i77',name:'Coconut Hair Oil',sub:'खोबरेल केस तेल',cat:'Personal Care',store:'patel',qty:1,unit:'bottle'},
+];
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let CUR_STORE='all', CUR_MON='', DATA={}, gToken=null, syncTimer=null;
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+function init(){
+  const sel=document.getElementById('monthSelect');
+  const now=new Date();
+  for(let i=0;i<18;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const o=document.createElement('option');
+    o.value=k;o.textContent=MONTHS[d.getMonth()]+' '+d.getFullYear();sel.appendChild(o);
+  }
+  CUR_MON=sel.value;
+  // Load from localStorage first (fast, works offline)
+  try{DATA=JSON.parse(localStorage.getItem('gb_data_v3')||'{}')}catch(e){DATA={}}
+  ensureMon(CUR_MON);
+  renderList();updateProgress();
+  document.getElementById('noteMon').textContent=fmtMon(CUR_MON);
+  document.getElementById('notesArea').value=DATA[CUR_MON].note||'';
+  setSyncStatus('local','Using local storage — sign in to sync across devices');
+  // Try to restore Google sign-in
+  restoreGoogleSession();
+}
+
+function ensureMon(k){
+  if(!DATA[k])DATA[k]={items:JSON.parse(JSON.stringify(DITEMS)),checked:{},bills:[],note:''};
+  else{
+    if(!DATA[k].items)DATA[k].items=JSON.parse(JSON.stringify(DITEMS));
+    if(!DATA[k].bills)DATA[k].bills=[];
+    const ids=DATA[k].items.map(i=>i.id);
+    DITEMS.forEach(d=>{if(!ids.includes(d.id))DATA[k].items.push(JSON.parse(JSON.stringify(d)))});
+  }
+}
+
+function saveLocal(){localStorage.setItem('gb_data_v3',JSON.stringify(DATA))}
+function fmtMon(k){const[y,m]=k.split('-');return MFULL[parseInt(m)-1]+' '+y}
+function switchMonth(k){CUR_MON=k;ensureMon(k);renderList();updateProgress();document.getElementById('noteMon').textContent=fmtMon(k);document.getElementById('notesArea').value=DATA[k].note||'';scheduleSave()}
+
+// ═══════════════════════════════════════════════════════
+//  GOOGLE AUTH + SHEETS SYNC
+// ═══════════════════════════════════════════════════════
+let tokenClient=null,gapiReady=false;
+
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({discoveryDocs:['https://sheets.googleapis.com/$discovery/rest?version=v4']});
+    gapiReady=true;
+  });
+}
+
+function signInGoogle(){
+  if(!tokenClient){
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GOOGLE_CLIENT_ID,
+      scope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file profile email',
+      callback:(resp)=>{
+        if(resp.error){showToast('❌ Sign-in failed: '+resp.error);return}
+        gToken=resp.access_token;
+        fetchUserInfo();
+      }
+    });
+  }
+  tokenClient.requestAccessToken();
+}
+
+async function fetchUserInfo(){
+  try{
+    const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}});
+    const u=await r.json();
+    document.getElementById('gsSignedOut').style.display='none';
+    document.getElementById('gsSignedIn').style.display='block';
+    document.getElementById('gsName').textContent=u.name+' ('+u.email+')';
+    document.getElementById('gsAvatar').src=u.picture;
+    localStorage.setItem('gb_user',JSON.stringify(u));
+    await ensureSheet();
+    await loadFromSheets();
+    setSyncStatus('ok','Synced with Google Sheets — works on any device');
+    document.getElementById('syncBtn').style.display='inline';
+  }catch(e){showToast('❌ '+e.message)}
+}
+
+function restoreGoogleSession(){
+  const u=localStorage.getItem('gb_user');
+  if(u){
+    const uj=JSON.parse(u);
+    document.getElementById('gsSignedOut').style.display='none';
+    document.getElementById('gsSignedIn').style.display='block';
+    document.getElementById('gsName').textContent=uj.name+' ('+uj.email+')';
+    document.getElementById('gsAvatar').src=uj.picture;
+    setSyncStatus('local','Session restored — tap Sync Now to refresh from cloud');
+    document.getElementById('syncBtn').style.display='inline';
+  }
+}
+
+function signOutGoogle(){
+  gToken=null;localStorage.removeItem('gb_user');localStorage.removeItem('gb_sheet_id');SHEET_ID='';
+  document.getElementById('gsSignedOut').style.display='block';
+  document.getElementById('gsSignedIn').style.display='none';
+  document.getElementById('syncBtn').style.display='none';
+  setSyncStatus('local','Signed out — data saved locally only');
+  showToast('Signed out from Google');
+}
+
+async function ensureSheet(){
+  // Check if we already have a sheet ID
+  if(SHEET_ID){
+    document.getElementById('sheetInfo').innerHTML=`✅ Sheet ID: <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}" target="_blank" style="color:var(--gs)">${SHEET_ID}</a>`;
+    return;
+  }
+  // Create new sheet via Drive API
+  try{
+    const r=await fetch('https://sheets.googleapis.com/v4/spreadsheets',{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+gToken},
+      body:JSON.stringify({properties:{title:'घरचा बाजार — Grocery Data'},sheets:[{properties:{title:'AppData'}}]})
+    });
+    const s=await r.json();
+    SHEET_ID=s.spreadsheetId;
+    localStorage.setItem('gb_sheet_id',SHEET_ID);
+    // Add header row
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/AppData!A1:B1?valueInputOption=RAW`,{
+      method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+gToken},
+      body:JSON.stringify({values:[['MonthKey','DataJSON']]})
+    });
+    document.getElementById('sheetInfo').innerHTML=`✅ New sheet created! <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}" target="_blank" style="color:var(--gs)">Open in Google Sheets</a>`;
+    showToast('✅ Google Sheet created!');
+  }catch(e){showToast('Sheet creation failed: '+e.message)}
+}
+
+async function loadFromSheets(){
+  if(!gToken||!SHEET_ID)return;
+  try{
+    setSyncStatus('saving','Loading from Google Sheets…');
+    const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/AppData!A2:B1000`,{headers:{Authorization:'Bearer '+gToken}});
+    const j=await r.json();
+    const rows=j.values||[];
+    rows.forEach(([k,v])=>{if(k&&v){try{DATA[k]=JSON.parse(v)}catch(e){}}});
+    ensureMon(CUR_MON);
+    saveLocal();renderList();updateProgress();
+    setSyncStatus('ok','Loaded from Google Sheets ✓');
+    showToast('☁️ Data loaded from cloud!');
+  }catch(e){setSyncStatus('error','Load failed: '+e.message)}
+}
+
+async function saveToSheets(monthKey){
+  if(!gToken||!SHEET_ID)return;
+  try{
+    setSyncStatus('saving','Saving to cloud…');
+    // Find row with this month key
+    const readR=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/AppData!A:A`,{headers:{Authorization:'Bearer '+gToken}});
+    const readJ=await readR.json();
+    const rows=readJ.values||[];
+    let rowIdx=rows.findIndex(r=>r[0]===monthKey);
+    const payload=JSON.stringify(DATA[monthKey]);
+
+    if(rowIdx<0){
+      // Append
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/AppData!A:B:append?valueInputOption=RAW`,{
+        method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+gToken},
+        body:JSON.stringify({values:[[monthKey,payload]]})
+      });
+    } else {
+      // Update
+      const range=`AppData!A${rowIdx+1}:B${rowIdx+1}`;
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`,{
+        method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+gToken},
+        body:JSON.stringify({values:[[monthKey,payload]]})
+      });
+    }
+    setSyncStatus('ok','Saved to cloud ✓ '+new Date().toLocaleTimeString());
+  }catch(e){setSyncStatus('error','Save failed — data is local. '+e.message)}
+}
+
+// Debounced save — waits 3 seconds after last change then saves
+function scheduleSave(){
+  saveLocal();
+  if(syncTimer)clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>saveToSheets(CUR_MON),3000);
+}
+
+async function manualSync(){
+  if(!gToken){showToast('⚠️ Sign in to Google first (⚙️ Setup tab)');return}
+  await loadFromSheets();
+  await saveToSheets(CUR_MON);
+}
+
+async function forceSync(){
+  if(!gToken){showToast('⚠️ Sign in first in ⚙️ Setup tab');return}
+  for(const k of Object.keys(DATA)){await saveToSheets(k)}
+  showToast('✅ All months synced to Google Sheets!');
+}
+
+function setSyncStatus(state,msg){
+  const dot=document.getElementById('syncDot');
+  const lbl=document.getElementById('syncLabel');
+  dot.className='sync-dot '+(state==='ok'?'ok':state==='saving'?'saving':state==='error'?'error':'');
+  lbl.textContent=msg;
+}
+
+// ═══════════════════════════════════════════════════════
+//  LAST ORDER HINT
+// ═══════════════════════════════════════════════════════
+function lastOrder(name){
+  const all=[];
+  Object.entries(DATA).forEach(([mk,md])=>{
+    (md.bills||[]).forEach(b=>{
+      (b.parsedItems||[]).forEach(pi=>{
+        if(pi.name.toLowerCase().includes(name.toLowerCase())||name.toLowerCase().includes(pi.name.toLowerCase()))
+          all.push({month:mk,qty:pi.qty,unit:pi.unit,price:pi.price,store:b.detectedStore||'?'});
+      });
+    });
+  });
+  if(!all.length)return null;
+  return all.sort((a,b)=>b.month.localeCompare(a.month))[0];
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER LIST
+// ═══════════════════════════════════════════════════════
+function renderList(){
+  const wrap=document.getElementById('catsWrap');wrap.innerHTML='';
+  const d=DATA[CUR_MON];
+  const cats={};
+  d.items.forEach(it=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push(it)});
+
+  Object.keys(cats).forEach(cat=>{
+    const its=cats[cat];
+    const blk=document.createElement('div');blk.className='catblock';blk.id='cat-'+cat.replace(/\W/g,'_');
+    const ckd=its.filter(i=>d.checked[i.id]).length;
+    const hdr=document.createElement('div');hdr.className='cathdr';
+    hdr.innerHTML=`<span class="caticon">${CICONS[cat]||'📦'}</span><span class="cattitle" style="color:var(--saffron)">${cat}</span><span class="catcnt">${ckd}/${its.length}</span><span class="cattog open">▾</span>`;
+    hdr.onclick=()=>{const l=blk.querySelector('.ilist');l.classList.toggle('vis');hdr.querySelector('.cattog').classList.toggle('open')};
+
+    const lst=document.createElement('div');lst.className='ilist vis';
+    its.forEach(it=>{
+      const isCkd=!!d.checked[it.id];
+      const lo=lastOrder(it.name);
+      const sl=STORES[it.store]?STORES[it.store].l:it.store;
+      const row=document.createElement('div');
+      row.className='irow'+(isCkd?' ckd':'')+(CUR_STORE!=='all'&&it.store!==CUR_STORE?' hid':'');
+      row.id='row-'+it.id;
+      let hint='';
+      if(lo){
+        const mp=fmtMon(lo.month).split(' ');
+        hint=`<div class="lohint">🕐 Last: ${lo.qty||''}${lo.unit?' '+lo.unit:''} @ ${lo.store} (${mp[0]} ${mp[1].slice(2)})</div>`;
+      }
+      row.innerHTML=`
+        <div class="chk ${isCkd?'on':''}" id="chk-${it.id}" onclick="toggleItem('${it.id}')"></div>
+        <div class="iinfo">
+          <div class="iname">${it.name}</div>
+          ${it.sub?`<div class="isub">${it.sub}</div>`:''}
+          ${hint}
+        </div>
+        <div class="iqty">
+          <button class="qbtn" onclick="chgQty('${it.id}',-1)">−</button>
+          <span class="qval" id="qty-${it.id}">${it.qty} ${it.unit}</span>
+          <button class="qbtn" onclick="chgQty('${it.id}',1)">+</button>
+        </div>
+        <input class="inote" type="text" placeholder="Note…" value="${it.note||''}" onchange="saveNote2('${it.id}',this.value)">
+        <span class="stag ${it.store}" title="Tap to change store" onclick="cycleStore('${it.id}',this)">${sl}</span>
+        <button class="delbtn" onclick="removeItem('${it.id}')">✕</button>`;
+      lst.appendChild(row);
+    });
+
+    const ck=cat.replace(/\W/g,'_');
+    const ar=document.createElement('div');ar.className='addrow';
+    ar.innerHTML=`<input class="addinp" type="text" placeholder="Add item…" id="ai-${ck}">
+      <select class="addsel" id="as-${ck}"><option value="patel">Patel's</option><option value="dmart">DMart</option><option value="reliance">Reliance</option><option value="both">Both</option></select>
+      <button class="addbtn" onclick="addItem('${cat}')">+ Add</button>`;
+    lst.appendChild(ar);
+    blk.appendChild(hdr);blk.appendChild(lst);wrap.appendChild(blk);
+  });
+}
+
+function toggleItem(id){
+  const d=DATA[CUR_MON];d.checked[id]=!d.checked[id];scheduleSave();
+  const row=document.getElementById('row-'+id),chk=document.getElementById('chk-'+id);
+  if(d.checked[id]){row.classList.add('ckd');chk.classList.add('on')}else{row.classList.remove('ckd');chk.classList.remove('on')}
+  updateProgress();updCatCnt(id);
+}
+function updCatCnt(id){
+  const d=DATA[CUR_MON];const it=d.items.find(i=>i.id===id);if(!it)return;
+  const blk=document.getElementById('cat-'+it.cat.replace(/\W/g,'_'));if(!blk)return;
+  const ci=d.items.filter(i=>i.cat===it.cat);
+  blk.querySelector('.catcnt').textContent=ci.filter(i=>d.checked[i.id]).length+'/'+ci.length;
+}
+function chgQty(id,delta){
+  const d=DATA[CUR_MON];const it=d.items.find(i=>i.id===id);if(!it)return;
+  const step=['kg','L'].includes(it.unit)?0.25:1;
+  it.qty=Math.max(0,Math.round((it.qty+delta*step)*100)/100);
+  document.getElementById('qty-'+id).textContent=it.qty+' '+it.unit;scheduleSave();
+}
+function saveNote2(id,v){const it=DATA[CUR_MON].items.find(i=>i.id===id);if(it){it.note=v;scheduleSave()}}
+function cycleStore(id,el){
+  const ord=['patel','dmart','reliance','both'];
+  const it=DATA[CUR_MON].items.find(i=>i.id===id);if(!it)return;
+  it.store=ord[(ord.indexOf(it.store)+1)%4];scheduleSave();
+  el.className='stag '+it.store;el.textContent=STORES[it.store]?.l||it.store;
+}
+function removeItem(id){const d=DATA[CUR_MON];d.items=d.items.filter(i=>i.id!==id);delete d.checked[id];scheduleSave();renderList();updateProgress()}
+function addItem(cat){
+  const ck=cat.replace(/\W/g,'_');
+  const inp=document.getElementById('ai-'+ck);const sel=document.getElementById('as-'+ck);
+  const name=inp.value.trim();if(!name)return;
+  DATA[CUR_MON].items.push({id:'c'+Date.now(),name,sub:'',cat,store:sel.value,qty:1,unit:'pcs',note:''});
+  scheduleSave();inp.value='';renderList();updateProgress();showToast('✅ '+name+' added!');
+}
+function filterStore(s,btn){
+  CUR_STORE=s;document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.irow').forEach(r=>{
+    if(s==='all')r.classList.remove('hid');
+    else{const t=r.querySelector('.stag');if(t&&!t.classList.contains(s))r.classList.add('hid');else r.classList.remove('hid')}
+  });
+}
+function updateProgress(){
+  const d=DATA[CUR_MON];const tot=d.items.length,done=Object.values(d.checked).filter(Boolean).length;
+  const pct=tot?Math.round(done/tot*100):0;
+  document.getElementById('pgfill').style.width=pct+'%';
+  document.getElementById('pglbl').textContent=done+' of '+tot+' items picked ('+pct+'%)';
+}
+
+// ═══════════════════════════════════════════════════════
+//  AI BILL SCANNING — via Netlify proxy (no CORS issues)
+// ═══════════════════════════════════════════════════════
+const AI_PROMPT=`You are a grocery bill reader for an Indian family. Extract ALL line items from this bill.
+Return ONLY valid JSON (no markdown, no explanation):
+{
+  "store": "dmart|patel|reliance|unknown",
+  "date": "YYYY-MM-DD or null",
+  "total": 0.00,
+  "items": [
+    {"name":"Clean item name","qty":1,"unit":"kg|L|g|ml|pcs|pkt|bottle|box","price":0.00,"category":"Dal & Pulses|Rice & Grains|Atta & Flour|Oils & Ghee|Spices (Masale)|Sugar, Salt & Basics|Tea, Coffee & Breakfast|Dairy & Eggs|Snacks & Namkeen|Dry Fruits & Nuts|Condiments & Sauces|Cleaning & Household|Personal Care|Vegetables & Fruits|Other"}
+  ]
+}
+Rules: Detect store from header (DMart→dmart, Patels/R-Mart→patel, Reliance/Smart/Fresh→reliance). Convert units (500g→qty:0.5,unit:kg; 250ml→qty:0.25,unit:L). Skip tax rows, discount rows, totals. Include every purchasable item. Clean up abbreviated product names into readable form.`;
+
+async function handleBillUpload(inp){
+  const files=Array.from(inp.files);
+  if(!DATA[CUR_MON].bills)DATA[CUR_MON].bills=[];
+  for(const f of files)await scanBill(f);
+  inp.value='';
+}
+
+async function scanBill(file){
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      const b64=e.target.result.split(',')[1];
+      const mime=file.type;
+      const bid='b'+Date.now()+Math.random().toString(36).slice(2,6);
+      const entry={id:bid,name:file.name,size:(file.size/1024).toFixed(1)+' KB',type:mime,data:e.target.result,month:CUR_MON,uploadedAt:new Date().toISOString(),parsedItems:null,detectedStore:null,totalAmount:null,billDate:null,scanning:true};
+      DATA[CUR_MON].bills.push(entry);saveLocal();renderBills();updBillBadge();
+
+      showAiPanel('scan',`<span class="spin"></span> Reading <strong>${file.name}</strong> with AI…`);
+
+      try{
+        // Build message for Claude
+        let msgContent;
+        if(mime==='application/pdf'){
+          msgContent=[{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},{type:'text',text:AI_PROMPT}];
+        } else {
+          msgContent=[{type:'image',source:{type:'base64',media_type:mime,data:b64}},{type:'text',text:AI_PROMPT}];
+        }
+
+        // Call via Netlify proxy — works from any browser, no CORS
+        const resp=await fetch(`${NETLIFY_URL}/.netlify/functions/ai-proxy`,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({messages:[{role:'user',content:msgContent}]})
+        });
+
+        if(!resp.ok){
+          const errText=await resp.text();
+          throw new Error('Proxy error '+resp.status+': '+errText.slice(0,200));
+        }
+
+        const result=await resp.json();
+        const text=(result.content||[]).map(c=>c.text||'').join('');
+        const clean=text.replace(/```json|```/g,'').trim();
+        const parsed=JSON.parse(clean);
+
+        if(parsed&&Array.isArray(parsed.items)){
+          const idx=DATA[CUR_MON].bills.findIndex(b=>b.id===bid);
+          if(idx>=0){
+            Object.assign(DATA[CUR_MON].bills[idx],{parsedItems:parsed.items,detectedStore:parsed.store||'unknown',totalAmount:parsed.total||null,billDate:parsed.date||null,scanning:false});
+          }
+          scheduleSave();renderBills();
+          showScannedUI(parsed,bid,file.name);
+        } else throw new Error('AI returned unexpected format');
+
+      }catch(err){
+        const idx=DATA[CUR_MON].bills.findIndex(b=>b.id===bid);
+        if(idx>=0)DATA[CUR_MON].bills[idx].scanning=false;
+        saveLocal();renderBills();
+        showAiPanel('err','❌ Scan failed: '+err.message+'<br><span style="font-size:.72rem">Make sure ANTHROPIC_API_KEY is set in Netlify environment variables.</span>');
+      }
+      resolve();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showAiPanel(t,html){
+  document.getElementById('aiPanel').style.display='block';
+  document.getElementById('aiStatus').innerHTML=html;
+  document.getElementById('aiResult').innerHTML='';
+}
+
+function showScannedUI(parsed,bid,fname){
+  const store=parsed.store||'unknown';
+  const sl=STORES[store]?.l||store;
+  const items=parsed.items||[];
+  document.getElementById('aiStatus').innerHTML=`✅ Found <strong>${items.length} items</strong> from <span class="stag ${store}" style="font-size:.68rem">${sl}</span>${parsed.date?' on <strong>'+parsed.date+'</strong>':''}${parsed.total?' • ₹<strong>'+parsed.total+'</strong>':''}`;
+  document.getElementById('aiResult').innerHTML=`
+    <p style="font-size:.73rem;color:var(--mid);margin:8px 0">Select items to import as purchased this month:</p>
+    <div style="max-height:300px;overflow-y:auto;border:1px solid var(--aid);border-radius:8px">
+    <table class="sctbl">
+      <thead><tr><th><input type="checkbox" id="selAll" onchange="document.querySelectorAll('.scc').forEach(c=>c.checked=this.checked)" checked style="accent-color:var(--ai)"></th><th>Item</th><th>Qty</th><th>₹</th><th>Category</th></tr></thead>
+      <tbody>${items.map((it,i)=>`<tr><td><input type="checkbox" class="scc scchk" data-i="${i}" checked></td><td>${it.name}</td><td>${it.qty??''}${it.unit?' '+it.unit:''}</td><td>${it.price||'-'}</td><td style="font-size:.65rem;color:var(--mid)">${it.category||'Other'}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <button class="imp-btn" onclick='importItems(${JSON.stringify(items).replace(/'/g,"&#39;")},"${store}","${bid}")'>📥 Import Selected to This Month</button>
+    <button class="disc-btn" onclick="document.getElementById('aiPanel').style.display='none'">Discard</button>`;
+}
+
+function importItems(items,store,bid){
+  const checks=document.querySelectorAll('.scc');
+  const sel=items.filter((_,i)=>checks[i]?.checked);
+  if(!sel.length){showToast('⚠️ Nothing selected');return}
+  const d=DATA[CUR_MON];let added=0,updated=0;
+  sel.forEach(pi=>{
+    const ex=d.items.find(li=>li.name.toLowerCase().includes(pi.name.toLowerCase())||pi.name.toLowerCase().includes(li.name.toLowerCase()));
+    if(ex){
+      if(store!=='unknown')ex.store=store;
+      ex.qty=pi.qty||ex.qty;ex.unit=pi.unit||ex.unit;
+      d.checked[ex.id]=true;updated++;
+    } else {
+      const nid='bill_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+      d.items.push({id:nid,name:pi.name,sub:'',cat:pi.category||'Other',store:store!=='unknown'?store:'patel',qty:pi.qty||1,unit:pi.unit||'pcs',note:''});
+      d.checked[nid]=true;added++;
+    }
+  });
+  scheduleSave();renderList();updateProgress();
+  document.getElementById('aiResult').innerHTML=`<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:10px;padding:11px;font-size:.8rem">✅ <strong>Done!</strong> ${updated} existing updated, ${added} new added — all marked purchased.<br><span style="font-size:.7rem;color:var(--mid)">See 📦 Purchases tab for full history.</span></div>`;
+  renderBills();showToast('📥 '+sel.length+' items imported!');
+}
+
+function renderBills(){
+  const wrap=document.getElementById('billsList');
+  const bills=DATA[CUR_MON]?.bills||[];
+  updBillBadge();
+  if(!bills.length){wrap.innerHTML='<p style="font-size:.8rem;color:var(--mid);padding:7px 0">No bills uploaded for this month yet.</p>';return}
+  wrap.innerHTML=bills.map((b,i)=>{
+    const s=b.detectedStore||'unknown';const ic=b.parsedItems?.length||0;
+    const prev=b.parsedItems?b.parsedItems.slice(0,5).map(p=>p.name).join(', ')+(b.parsedItems.length>5?'…':''):'';
+    return`<div class="bitem">
+      <span class="btag" style="background:${b.type.includes('pdf')?'#E53935':'#1565C0'}">${b.type.includes('pdf')?'PDF':'IMG'}</span>
+      ${s!=='unknown'?`<span class="btag" style="background:${STORES[s]?.c||'#777'}">${STORES[s]?.l||s}</span>`:''}
+      ${b.scanning?`<span class="btag" style="background:var(--ai)"><span class="spin" style="width:10px;height:10px;border-width:1.5px"></span> Scanning…</span>`:''}
+      ${ic?`<span class="btag" style="background:var(--patel)">${ic} items</span>`:''}
+      ${b.totalAmount?`<span class="btag" style="background:var(--saffron)">₹${b.totalAmount}</span>`:''}
+      <span class="bname">${b.name}</span><span class="bsize">${b.size}</span>
+      ${b.type.includes('image')?`<a href="${b.data}" target="_blank" style="font-size:.68rem;color:var(--saffron)">View</a>`:''}
+      <button class="bdel" onclick="delBill(${i})">✕</button>
+      ${prev?`<div class="bprev">🛒 ${prev}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function updBillBadge(){document.getElementById('billBadge').textContent=(DATA[CUR_MON]?.bills||[]).length}
+function delBill(i){DATA[CUR_MON].bills.splice(i,1);scheduleSave();renderBills();showToast('🗑️ Bill removed')}
+
+// ═══════════════════════════════════════════════════════
+//  PURCHASES TAB
+// ═══════════════════════════════════════════════════════
+function renderPurchases(){
+  const wrap=document.getElementById('purchWrap');
+  const all=[];
+  Object.entries(DATA).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([mk,md])=>{
+    (md.bills||[]).forEach(b=>{
+      (b.parsedItems||[]).forEach(pi=>all.push({...pi,month:mk,store:b.detectedStore||'unknown',billName:b.name}));
+    });
+  });
+  if(!all.length){wrap.innerHTML='<p style="font-size:.8rem;color:var(--mid)">No purchase data yet. Upload bills in 🧾 Bills & AI tab.</p>';return}
+  const byMon={};all.forEach(p=>{if(!byMon[p.month])byMon[p.month]=[];byMon[p.month].push(p)});
+  wrap.innerHTML=Object.keys(byMon).sort().reverse().map(mk=>{
+    const ps=byMon[mk];const tot=ps.reduce((s,p)=>s+(p.price||0),0);
+    return`<div style="margin-bottom:16px">
+      <div style="font-size:.83rem;font-weight:900;color:var(--saffron);margin-bottom:7px;display:flex;justify-content:space-between">
+        <span>📅 ${fmtMon(mk)}</span>${tot?`<span style="color:var(--mid)">₹${tot.toFixed(2)}</span>`:''}
+      </div>
+      <table class="phtbl"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Store</th><th>Category</th></tr></thead>
+      <tbody>${ps.map(p=>`<tr><td><strong>${p.name}</strong></td><td>${p.qty??''}${p.unit?' '+p.unit:''}</td><td>${p.price?'₹'+p.price:'-'}</td><td><span class="stag ${p.store}" style="font-size:.6rem">${STORES[p.store]?.l||p.store}</span></td><td style="font-size:.68rem;color:var(--mid)">${p.category||'-'}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+  }).join('');
+  // Frequent items
+  const cnt={};
+  Object.values(DATA).forEach(md=>{(md.bills||[]).forEach(b=>{(b.parsedItems||[]).forEach(pi=>{const k=pi.name.toLowerCase();if(!cnt[k])cnt[k]={name:pi.name,n:0,lastQty:pi.qty,lastUnit:pi.unit,lastStore:b.detectedStore};cnt[k].n++;cnt[k].lastQty=pi.qty;cnt[k].lastUnit=pi.unit;cnt[k].lastStore=b.detectedStore})})});
+  const srt=Object.values(cnt).filter(c=>c.n>0).sort((a,b)=>b.n-a.n).slice(0,12);
+  const mx=srt[0]?.n||1;
+  const cols=['#FF6B00','#0057A8','#2E7D32','#C62828','#7C3AED','#F57C00'];
+  document.getElementById('freqWrap').innerHTML=srt.map((c,i)=>`<div class="barrow"><span class="barlbl" title="${c.name}">${c.name.length>14?c.name.slice(0,13)+'…':c.name}</span><div class="bartrk"><div class="barfil" style="width:${c.n/mx*100}%;background:${cols[i%6]}"><span>${c.n}×</span></div></div><span class="barcnt" style="font-size:.63rem">${c.lastQty||''}${c.lastUnit?' '+c.lastUnit:''}</span></div>`).join('')
+    ||'<p style="font-size:.78rem;color:var(--mid)">Upload bills from multiple months to see frequency.</p>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  HISTORY TAB
+// ═══════════════════════════════════════════════════════
+function renderHistory(){
+  const wrap=document.getElementById('histWrap');wrap.innerHTML='';
+  const keys=Object.keys(DATA).sort().reverse();
+  if(!keys.length){wrap.innerHTML='<p style="text-align:center;color:var(--mid);padding:28px">No history yet.</p>';return}
+  keys.forEach(k=>{
+    const d=DATA[k];if(!d.items)return;
+    const tot=d.items.length,done=Object.values(d.checked||{}).filter(Boolean).length;
+    const bills=d.bills||[];
+    const blk=document.createElement('div');blk.className='hmonth';
+    blk.innerHTML=`<div class="hmhdr" onclick="this.nextElementSibling.classList.toggle('open')"><h3>📅 ${fmtMon(k)}</h3><span style="font-size:.74rem;color:var(--mid)">${done}/${tot} ticked • ${bills.length} bill(s)</span></div>
+    <div class="hmitems">${d.items.map(it=>`<div class="hmiline"><span class="${d.checked&&d.checked[it.id]?'hick':'hiun'}">${d.checked&&d.checked[it.id]?'✓':'○'}</span><span style="flex:1">${it.name}${it.sub?` <span style="color:var(--mid);font-size:.68rem">(${it.sub})</span>`:''}</span><span style="font-size:.68rem;color:var(--mid)">${it.qty} ${it.unit}</span><span class="stag ${it.store}" style="font-size:.56rem">${STORES[it.store]?.l?.slice(0,1)||'?'}</span></div>`).join('')}</div>`;
+    wrap.appendChild(blk);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  TRENDS TAB
+// ═══════════════════════════════════════════════════════
+function renderTrends(){
+  const cols10=['#FF6B00','#E65100','#0057A8','#2E7D32','#FF9A3C','#7C3AED','#388E3C','#F57C00','#1976D2','#43A047'];
+  // Top items
+  const tc={};Object.values(DATA).forEach(md=>{if(!md.items)return;md.items.forEach(it=>{if(md.checked&&md.checked[it.id])tc[it.name]=(tc[it.name]||0)+1})});
+  const ts=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,10);const tm=ts[0]?.[1]||1;
+  document.getElementById('topChart').innerHTML=ts.map(([n,c],i)=>`<div class="barrow"><span class="barlbl" title="${n}">${n.length>14?n.slice(0,13)+'…':n}</span><div class="bartrk"><div class="barfil" style="width:${c/tm*100}%;background:${cols10[i%10]}"><span>${c}×</span></div></div><span class="barcnt">${c}</span></div>`).join('')||'<p style="font-size:.8rem;color:var(--mid)">No data yet.</p>';
+  // Store preference
+  const sc={dmart:0,patel:0,reliance:0};
+  Object.values(DATA).forEach(md=>{(md.bills||[]).forEach(b=>{(b.parsedItems||[]).forEach(pi=>{if(sc[b.detectedStore]!==undefined)sc[b.detectedStore]++})});if(md.items)md.items.forEach(it=>{if(md.checked&&md.checked[it.id]&&sc[it.store]!==undefined)sc[it.store]++})});
+  const sm=Math.max(...Object.values(sc),1);
+  document.getElementById('storeChart').innerHTML=[['dmart','🔵 DMart','#0057A8'],['patel',"🟢 Patel's",'#2E7D32'],['reliance','🔴 Reliance','#C62828']].map(([k,l,c])=>`<div class="barrow"><span class="barlbl">${l}</span><div class="bartrk"><div class="barfil" style="width:${sc[k]/sm*100}%;background:${c}"><span>${sc[k]}</span></div></div><span class="barcnt">${sc[k]}</span></div>`).join('');
+  // Spend
+  const sp={dmart:0,patel:0,reliance:0};Object.values(DATA).forEach(md=>{(md.bills||[]).forEach(b=>{if(b.totalAmount&&sp[b.detectedStore]!==undefined)sp[b.detectedStore]+=parseFloat(b.totalAmount)||0})});
+  const spm=Math.max(...Object.values(sp),1);
+  document.getElementById('spendChart').innerHTML=sp.dmart+sp.patel+sp.reliance===0?'<p style="font-size:.78rem;color:var(--mid)">Upload bills with totals to see spend.</p>':[['dmart','🔵 DMart','#0057A8'],['patel',"🟢 Patel's",'#2E7D32'],['reliance','🔴 Reliance','#C62828']].map(([k,l,c])=>`<div class="barrow"><span class="barlbl">${l}</span><div class="bartrk"><div class="barfil" style="width:${sp[k]/spm*100}%;background:${c}"><span>₹${Math.round(sp[k])}</span></div></div><span class="barcnt" style="font-size:.65rem">₹${Math.round(sp[k])}</span></div>`).join('');
+  // Heatmap
+  const now=new Date();const cells=[];let mxv=0;
+  for(let i=11;i>=0;i--){const d2=new Date(now.getFullYear(),now.getMonth()-i,1);const k=d2.getFullYear()+'-'+String(d2.getMonth()+1).padStart(2,'0');const md=DATA[k];const c=md?Object.values(md.checked||{}).filter(Boolean).length:0;mxv=Math.max(mxv,c);cells.push({k,l:MONTHS[d2.getMonth()],c})}
+  document.getElementById('heatWrap').innerHTML=`<div class="hmap">${cells.map(c=>{const int=mxv?c.c/mxv:0;const bg=c.c===0?'#EEE':`rgba(255,107,0,${0.15+int*0.85})`;return`<div class="hmcell" style="background:${bg}" title="${c.k}: ${c.c} items">${c.c||''}</div>`}).join('')}</div><div style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-top:3px">${cells.map(c=>`<div class="hmlbl">${c.l}</div>`).join('')}</div>`;
+  // Category
+  const cc={};Object.values(DATA).forEach(md=>{if(!md.items)return;md.items.forEach(it=>{if(md.checked&&md.checked[it.id])cc[it.cat]=(cc[it.cat]||0)+1})});
+  const cs=Object.entries(cc).sort((a,b)=>b[1]-a[1]);const cm=cs[0]?.[1]||1;
+  const ccols=['#FF6B00','#0057A8','#2E7D32','#FF9A3C','#8D6E63','#5C6BC0','#00897B','#F57C00','#AD1457','#558B2F','#1565C0','#6A1B9A','#00695C'];
+  document.getElementById('catChart').innerHTML=cs.map(([cat,cnt],i)=>`<div class="barrow"><span class="barlbl" style="font-size:.7rem" title="${cat}">${CICONS[cat]||'📦'} ${cat.length>12?cat.slice(0,11)+'…':cat}</span><div class="bartrk"><div class="barfil" style="width:${cnt/cm*100}%;background:${ccols[i%13]}"><span>${cnt}</span></div></div><span class="barcnt">${cnt}</span></div>`).join('')||'<p style="font-size:.8rem;color:var(--mid)">No data yet.</p>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  NOTES
+// ═══════════════════════════════════════════════════════
+function saveNote(){DATA[CUR_MON].note=document.getElementById('notesArea').value;scheduleSave();showToast('💾 Saved!');renderOldNotes()}
+function renderOldNotes(){
+  const wrap=document.getElementById('oldNotes');
+  const old=Object.entries(DATA).filter(([k,v])=>k!==CUR_MON&&v.note).sort().reverse();
+  if(!old.length){wrap.innerHTML='';return}
+  wrap.innerHTML='<h3 style="font-size:.88rem;font-weight:900;margin-bottom:11px">📚 Previous Notes</h3>'+old.map(([k,v])=>`<div style="margin-bottom:10px;padding:10px;background:var(--cream);border-radius:10px;border:1px solid var(--bdr)"><div style="font-size:.72rem;font-weight:900;color:var(--saffron);margin-bottom:4px">${fmtMon(k)}</div><div style="font-size:.79rem;color:var(--mid);white-space:pre-wrap">${v.note}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT / IMPORT BACKUP
+// ═══════════════════════════════════════════════════════
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='gharcha-bazar-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  showToast('📥 Backup downloaded!');
+}
+function importJSON(){document.getElementById('importFile').click()}
+function doImport(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      Object.assign(DATA,d);saveLocal();renderList();updateProgress();
+      showToast('✅ Data imported from backup!');
+      if(gToken)forceSync();
+    }catch(err){showToast('❌ Invalid backup file')}
+  };r.readAsText(f);inp.value='';
+}
+
+// ═══════════════════════════════════════════════════════
+//  TABS & MODAL & UTILS
+// ═══════════════════════════════════════════════════════
+function switchTab(t){
+  ['list','bills','purchases','history','trends','notes','setup'].forEach(n=>{document.getElementById('tab-'+n).style.display=n===t?'block':'none'});
+  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['list','bills','purchases','history','trends','notes','setup'][i]===t)});
+  if(t==='bills')renderBills();
+  if(t==='purchases')renderPurchases();
+  if(t==='trends')renderTrends();
+  if(t==='history')renderHistory();
+  if(t==='notes')renderOldNotes();
+}
+function openModal(){document.getElementById('clearModal').classList.add('open')}
+function closeModal(){document.getElementById('clearModal').classList.remove('open')}
+function clearMonth(){DATA[CUR_MON].checked={};scheduleSave();closeModal();renderList();updateProgress();showToast('🔄 List reset!')}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+init();
+</script>
+</body>
+</html>
